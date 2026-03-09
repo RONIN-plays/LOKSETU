@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
 import 'home_screen.dart';
+import 'login_screen.dart';
 
 class LanguageScreen extends StatelessWidget {
   @override
@@ -13,30 +13,20 @@ class LanguageScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.language,
-                size: 80,
-                color: Color(0xFF6A11CB),
-              ),
+              Icon(Icons.language, size: 40, color: Color(0xFF6A11CB)),
 
               SizedBox(height: 20),
 
               Text(
                 "Select Language",
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
 
               SizedBox(height: 10),
 
               Text(
                 "আপনার ভাষা নির্বাচন করুন",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey[700],
-                ),
+                style: TextStyle(fontSize: 18, color: Colors.grey[700]),
               ),
 
               SizedBox(height: 40),
@@ -50,15 +40,10 @@ class LanguageScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => LoginScreen(),
-                    ),
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
                   );
                 },
-                child: Text(
-                  "English",
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: Text("English", style: TextStyle(fontSize: 18)),
               ),
 
               SizedBox(height: 20),
@@ -72,15 +57,10 @@ class LanguageScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => HomeScreen(),
-                    ),
+                    MaterialPageRoute(builder: (context) => HomeScreen()),
                   );
                 },
-                child: Text(
-                  "বাংলা",
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: Text("বাংলা", style: TextStyle(fontSize: 18)),
               ),
             ],
           ),

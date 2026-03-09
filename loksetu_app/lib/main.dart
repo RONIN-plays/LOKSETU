@@ -26,6 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+
     Timer(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
@@ -46,15 +47,46 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         ),
         child: Center(
-          child: Text(
-            'Lok Setu',
-            style: TextStyle(
-              fontSize: 32,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.account_balance, size: 90, color: Colors.white),
+
+              SizedBox(height: 20),
+
+              Text(
+                "Lok Setu",
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+
+              SizedBox(height: 10),
+
+              Text(
+                "Bridging Citizens & Governance",
+                style: TextStyle(fontSize: 16, color: Colors.white70),
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Lok Setu"),
+        backgroundColor: Color(0xFF6A11CB),
+      ),
+      body: Center(
+        child: Text("Welcome to Lok Setu", style: TextStyle(fontSize: 22)),
       ),
     );
   }

@@ -80,6 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
+                        // TODO: Replace with backend authentication
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(builder: (_) => HomeScreen()),
@@ -93,7 +94,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 16),
 
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // TODO: Navigate to Forgot Password / OTP
+                  },
                   child: Text(
                     "Forgot Password?",
                     style: TextStyle(color: Color(0xFF6A11CB)),
