@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'home_screen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -133,10 +134,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           } else if (emailOrPhone.contains('@')) {
                             // Email login
-                            await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
                               email: emailOrPhone,
                               password: password,
                             );
+
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(builder: (_) => HomeScreen()),
@@ -217,6 +219,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: Text(
                     "Forgot Password?",
+                    style: TextStyle(color: Color(0xFF6A11CB)),
+                  ),
+                ),
+
+                SizedBox(height: 8),
+
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => SignupScreen()),
+                    );
+                  },
+                  child: Text(
+                    "Don't have an account? Sign Up",
                     style: TextStyle(color: Color(0xFF6A11CB)),
                   ),
                 ),
