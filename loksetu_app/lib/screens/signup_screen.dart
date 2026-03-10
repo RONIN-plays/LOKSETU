@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'home_screen.dart';
@@ -139,18 +140,18 @@ class _SignupScreenState extends State<SignupScreen> {
                             password: _passwordController.text,
                           );
 
+                          // Send email verification
+                          await FirebaseAuth.instance.currentUser?.sendEmailVerification();
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Account created! Logging you in.'),
+                              content: Text('Account created! Please check your email to verify.'),
                               backgroundColor: Colors.green,
                             ),
                           );
 
-                          // Navigate to home
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => HomeScreen()),
-                          );
+                          // Navigate back to login
+                          Navigator.pop(context);
                         } on FirebaseAuthException catch (e) {
                           String errorMessage = 'Registration failed';
                           if (e.code == 'weak-password') {
