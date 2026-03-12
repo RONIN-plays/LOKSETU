@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/complaint.dart';
 import '../data/complaint_data.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 class ReportIssueScreen extends StatefulWidget {
   @override
   _ReportIssueScreenState createState() => _ReportIssueScreenState();
@@ -36,6 +38,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
       description: description,
       category: category,
       timestamp: DateTime.now().toString(),
+      submittedBy: FirebaseAuth.instance.currentUser?.email ?? 'Anonymous',
     );
 
     // Add to global list

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'home_screen.dart';
 import 'signup_screen.dart';
+import 'admin_panel_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -18,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _isOtpSent = false;
   String _verificationId = '';
+  bool _isAdmin = false; // New state for role
 
   @override
   void initState() {
@@ -40,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFF3E8FF),
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
@@ -53,6 +55,34 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF6A11CB),
+                  ),
+                ),
+                SizedBox(height: 20),
+
+                // ── Role Selector ──
+                DropdownButtonFormField<bool>(
+                  value: _isAdmin,
+                  items: [
+                    DropdownMenuItem(
+                      value: false,
+                      child: Text("Citizen"),
+                    ),
+                    DropdownMenuItem(
+                      value: true,
+                      child: Text("Admin"),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _isAdmin = value);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: "Select Role",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -115,6 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF6A11CB),
+                      padding: EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: _isLoading ? null : () async {
                       if (_formKey.currentState!.validate()) {
@@ -127,10 +158,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               verificationId: _verificationId,
                               smsCode: password,
                             );
-                            await FirebaseAuth.instance.signInWithCredential(credential);
+                            UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+                            if (_isAdmin && userCredential.user?.email != 'admin@gmail.com') {
+                              await FirebaseAuth.instance.signOut();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Access Denied: You do not have Admin privileges.')),
+                              );
+                              setState(() => _isLoading = false);
+                              return;
+                            }
+
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (_) => HomeScreen()),
+                              MaterialPageRoute(builder: (_) => _isAdmin ? AdminPanelScreen() : HomeScreen()),
                             );
                           } else if (emailOrPhone.contains('@')) {
                             // Email login
@@ -139,19 +180,39 @@ class _LoginScreenState extends State<LoginScreen> {
                               password: password,
                             );
 
+                            // --- Security check for Admin ---
+                            if (_isAdmin && userCredential.user?.email != 'admin@gmail.com') {
+                              // User checked "Admin" but doesn't have the admin email
+                              await FirebaseAuth.instance.signOut();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Access Denied: You do not have Admin privileges.')),
+                              );
+                              setState(() => _isLoading = false);
+                              return;
+                            }
+
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (_) => HomeScreen()),
+                              MaterialPageRoute(builder: (_) => _isAdmin ? AdminPanelScreen() : HomeScreen()),
                             );
                           } else {
                             // Send OTP for phone
                             await FirebaseAuth.instance.verifyPhoneNumber(
                               phoneNumber: emailOrPhone,
                               verificationCompleted: (PhoneAuthCredential credential) async {
-                                await FirebaseAuth.instance.signInWithCredential(credential);
+                                UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+                                if (_isAdmin && userCredential.user?.email != 'admin@gmail.com') {
+                                  await FirebaseAuth.instance.signOut();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Access Denied: You do not have Admin privileges.')),
+                                  );
+                                  return;
+                                }
+
                                 Navigator.pushReplacement(
                                   context,
-                                  MaterialPageRoute(builder: (_) => HomeScreen()),
+                                  MaterialPageRoute(builder: (_) => _isAdmin ? AdminPanelScreen() : HomeScreen()),
                                 );
                               },
                               verificationFailed: (FirebaseAuthException e) {
@@ -190,7 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: _isLoading
                         ? CircularProgressIndicator(color: Colors.white)
-                        : Text(_isOtpSent ? "Verify OTP" : "Login", style: TextStyle(fontSize: 16)),
+                        : Text(_isOtpSent ? "Verify OTP" : "Login", style: TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 ),
 
