@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'home_screen.dart';
@@ -12,7 +11,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isLoading = false;
   bool _isObscured = true;
   bool _isConfirmObscured = true;
@@ -81,7 +81,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       icon: Icon(
                         _isObscured ? Icons.visibility : Icons.visibility_off,
                       ),
-                      onPressed: () => setState(() => _isObscured = !_isObscured),
+                      onPressed: () =>
+                          setState(() => _isObscured = !_isObscured),
                     ),
                   ),
                   validator: (value) {
@@ -107,9 +108,13 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isConfirmObscured ? Icons.visibility : Icons.visibility_off,
+                        _isConfirmObscured
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
-                      onPressed: () => setState(() => _isConfirmObscured = !_isConfirmObscured),
+                      onPressed: () => setState(
+                        () => _isConfirmObscured = !_isConfirmObscured,
+                      ),
                     ),
                   ),
                   validator: (value) {
@@ -131,52 +136,61 @@ class _SignupScreenState extends State<SignupScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF6A11CB),
                     ),
-                    onPressed: _isLoading ? null : () async {
-                      if (_formKey.currentState!.validate()) {
-                        setState(() => _isLoading = true);
-                        try {
-                          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                            email: _emailController.text.trim(),
-                            password: _passwordController.text,
-                          );
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            if (_formKey.currentState!.validate()) {
+                              setState(() => _isLoading = true);
+                              try {
+                                await FirebaseAuth.instance
+                                    .createUserWithEmailAndPassword(
+                                      email: _emailController.text.trim(),
+                                      password: _passwordController.text,
+                                    );
 
-                          // Send email verification
-                          await FirebaseAuth.instance.currentUser?.sendEmailVerification();
+                                // Send email verification
+                                await FirebaseAuth.instance.currentUser
+                                    ?.sendEmailVerification();
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Account created! Please check your email to verify.'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Account created! Please check your email to verify.',
+                                    ),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
 
-                          // Navigate back to login
-                          Navigator.pop(context);
-                        } on FirebaseAuthException catch (e) {
-                          String errorMessage = 'Registration failed';
-                          if (e.code == 'weak-password') {
-                            errorMessage = 'Password is too weak';
-                          } else if (e.code == 'email-already-in-use') {
-                            errorMessage = 'Email already exists';
-                          } else if (e.code == 'invalid-email') {
-                            errorMessage = 'Invalid email format';
-                          }
+                                // Navigate back to login
+                                Navigator.pop(context);
+                              } on FirebaseAuthException catch (e) {
+                                String errorMessage = 'Registration failed';
+                                if (e.code == 'weak-password') {
+                                  errorMessage = 'Password is too weak';
+                                } else if (e.code == 'email-already-in-use') {
+                                  errorMessage = 'Email already exists';
+                                } else if (e.code == 'invalid-email') {
+                                  errorMessage = 'Invalid email format';
+                                }
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(errorMessage)),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('An error occurred')),
-                          );
-                        } finally {
-                          setState(() => _isLoading = false);
-                        }
-                      }
-                    },
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(errorMessage)),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('An error occurred')),
+                                );
+                              } finally {
+                                setState(() => _isLoading = false);
+                              }
+                            }
+                          },
                     child: _isLoading
                         ? CircularProgressIndicator(color: Colors.white)
-                        : Text("Create Account", style: TextStyle(fontSize: 16)),
+                        : Text(
+                            "Create Account",
+                            style: TextStyle(fontSize: 16),
+                          ),
                   ),
                 ),
 
