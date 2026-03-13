@@ -13,6 +13,9 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   String _selectedStatusFilter = 'All';
   String _selectedCategoryFilter = 'All';
 
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
   final List<String> _statusFilters = [
     'All',
     'Submitted',
@@ -31,6 +34,12 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   ];
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('complaints').snapshots(),
@@ -47,11 +56,12 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
           return Complaint.fromJson(doc.data() as Map<String, dynamic>, doc.id);
         }).toList();
 
-        // Filter complaints based on selections
+        // Filter complaints based on selections and search query
         List<Complaint> filteredComplaints = allComplaints.where((c) {
           bool matchesStatus = _selectedStatusFilter == 'All' || c.status == _selectedStatusFilter;
           bool matchesCategory = _selectedCategoryFilter == 'All' || c.category == _selectedCategoryFilter;
-          return matchesStatus && matchesCategory;
+          bool matchesSearch = _searchQuery.isEmpty || c.id.toLowerCase().contains(_searchQuery.toLowerCase());
+          return matchesStatus && matchesCategory && matchesSearch;
         }).toList();
 
         int total = allComplaints.length;
@@ -112,8 +122,52 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 ),
               ),
 
+              // Search Bar
+              Padding(
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 4, offset: Offset(0, 2))
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: "Search by Complaint ID",
+                      prefixIcon: Icon(Icons.search, color: Color(0xFF6A11CB)),
+                      suffixIcon: _searchQuery.isNotEmpty 
+                        ? IconButton(
+                            icon: Icon(Icons.clear, color: Colors.grey),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _searchQuery = '';
+                              });
+                            },
+                          ) 
+                        : null,
+                      filled: true,
+                      fillColor: Colors.transparent, // Color is now handled by Container
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ),
+              ),
+
               // Most Frequent Category Card
-              if (mostFrequentCategory != null)
+              if (mostFrequentCategory != null && _searchQuery.isEmpty)
                 Container(
                   margin: EdgeInsets.all(16),
                   padding: EdgeInsets.all(16),
