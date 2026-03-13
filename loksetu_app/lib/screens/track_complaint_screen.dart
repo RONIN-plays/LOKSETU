@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/complaint.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TrackComplaintScreen extends StatefulWidget {
   @override
@@ -409,7 +410,12 @@ class _TrackComplaintScreenState extends State<TrackComplaintScreen> {
                                 backgroundColor: Colors.green,
                                 padding: EdgeInsets.symmetric(vertical: 10),
                               ),
-                              onPressed: () {},
+                              onPressed: () async {
+                                final Uri url = Uri.parse('tel:1800123456');
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url);
+                                }
+                              },
                               icon: Icon(Icons.call_rounded),
                               label: Text("Call Now"),
                             ),
@@ -421,7 +427,12 @@ class _TrackComplaintScreenState extends State<TrackComplaintScreen> {
                                 backgroundColor: Colors.blue,
                                 padding: EdgeInsets.symmetric(vertical: 10),
                               ),
-                              onPressed: () {},
+                              onPressed: () async {
+                                final Uri url = Uri.parse('mailto:support@loksetu.com?subject=Tracking Complaint ${foundComplaint.id}');
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url);
+                                }
+                              },
                               icon: Icon(Icons.email_rounded),
                               label: Text("Email"),
                             ),

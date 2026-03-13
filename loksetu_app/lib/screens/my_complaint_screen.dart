@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/complaint.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MyComplaintsScreen extends StatefulWidget {
   @override
@@ -468,7 +469,12 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                     backgroundColor: Colors.green,
                                     padding: EdgeInsets.symmetric(vertical: 10),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    final Uri url = Uri.parse('tel:1800123456'); // Placeholder helpline
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    }
+                                  },
                                   icon: Icon(Icons.call_rounded),
                                   label: Text("Call"),
                                 ),
@@ -480,7 +486,12 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                     backgroundColor: Colors.blue,
                                     padding: EdgeInsets.symmetric(vertical: 10),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    final Uri url = Uri.parse('mailto:support@loksetu.com?subject=Inquiry about Complaint ${complaint.id}');
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    }
+                                  },
                                   icon: Icon(Icons.email_rounded),
                                   label: Text("Email"),
                                 ),
