@@ -57,6 +57,20 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         int total = allComplaints.length;
         int pending = allComplaints.where((c) => c.status == 'Submitted').length;
         int resolved = allComplaints.where((c) => c.status == 'Resolved').length;
+        
+        // Calculate most frequent category
+        Map<String, int> categoryCount = {};
+        for (var complaint in allComplaints) {
+          categoryCount[complaint.category] = (categoryCount[complaint.category] ?? 0) + 1;
+        }
+        String? mostFrequentCategory;
+        int maxCount = 0;
+        categoryCount.forEach((category, count) {
+          if (count > maxCount) {
+            maxCount = count;
+            mostFrequentCategory = category;
+          }
+        });
 
         return Scaffold(
           backgroundColor: Color(0xFFF5F7FB),
@@ -97,6 +111,55 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                   ],
                 ),
               ),
+
+              // Most Frequent Category Card
+              if (mostFrequentCategory != null)
+                Container(
+                  margin: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade200, width: 2),
+                    boxShadow: [
+                      BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 4, offset: Offset(0, 2))
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.trending_up, color: Colors.blue, size: 28),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Most Frequent Issue Category",
+                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              mostFrequentCategory!,
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF6A11CB)),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "$maxCount complaints",
+                              style: TextStyle(fontSize: 12, color: Colors.blue[600]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
               // Filters
               Padding(
