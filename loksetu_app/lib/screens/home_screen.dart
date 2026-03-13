@@ -51,138 +51,144 @@ class HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.all(16),
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Greeting
-            Text(
-              "Hello, User",
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-
-            // Search Bar
-            TextField(
-              decoration: InputDecoration(
-                hintText: "Search services",
-                prefixIcon: Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+            // Full-width Banner Image (Edge-to-edge)
+            Container(
+              width: double.infinity,
+              height: 220,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+                child: Image.asset(
+                  'assets/bg.jpg',
+                  width: double.infinity,
+                  height: 220,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-            SizedBox(height: 20),
-
-            Text(
-              "Quick Services",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 15),
-
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-                childAspectRatio: 1.3,
+            
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                  Text(
+                    "Quick Services",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 15),
+
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15,
+                    childAspectRatio: 1.3,
+                    children: [
+                      _buildServiceItem(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => ReportIssueScreen(),
-                        ),
-                      );
-                    },
-                    child: serviceCard(
-                      Icons.report,
-                      "Report Issue",
-                      Colors.blue.shade100,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                        Icons.report,
+                        "Report Issue",
+                        Colors.blue.shade100,
+                        ReportIssueScreen(),
+                      ),
+                      _buildServiceItem(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => TrackComplaintScreen(),
-                        ),
-                      );
-                    },
-                    child: serviceCard(
-                      Icons.track_changes,
-                      "Track Complaint",
-                      Colors.yellow.shade100,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                        Icons.track_changes,
+                        "Track Complaint",
+                        Colors.yellow.shade100,
+                        TrackComplaintScreen(),
+                      ),
+                      _buildServiceItem(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => VillageIssuesScreen(),
+                        Icons.map,
+                        "Village Issues",
+                        Colors.green.shade100,
+                        VillageIssuesScreen(),
+                      ),
+                      _buildServiceItem(
+                        context,
+                        Icons.account_balance,
+                        "Govt Schemes",
+                        Colors.blue.shade100,
+                        null,
+                      ),
+                      _buildServiceItem(
+                        context,
+                        Icons.phone,
+                        "Helpline",
+                        Colors.red.shade100,
+                        null,
+                      ),
+                      _buildServiceItem(
+                        context,
+                        Icons.more_horiz,
+                        "More",
+                        Colors.grey.shade200,
+                        null,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 25),
+
+                  Text(
+                    "Recent Activity",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    child: ListTile(
+                      leading: Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          shape: BoxShape.circle,
                         ),
-                      );
-                    },
-                    child: serviceCard(
-                      Icons.map,
-                      "Village Issues",
-                      Colors.green.shade100,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // Navigate to Govt Schemes screen
-                    },
-                    child: serviceCard(
-                      Icons.account_balance,
-                      "Govt Schemes",
-                      Colors.blue.shade100,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // Navigate to Helpline screen
-                    },
-                    child: serviceCard(
-                      Icons.phone,
-                      "Helpline",
-                      Colors.red.shade100,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // Navigate to More screen
-                    },
-                    child: serviceCard(
-                      Icons.more_horiz,
-                      "More",
-                      Colors.grey.shade200,
+                        child: Icon(Icons.assignment, color: Colors.blue),
+                      ),
+                      title: Text("Reported Road Damage"),
+                      subtitle: Text("Status: In Progress"),
+                      trailing: Icon(Icons.arrow_forward_ios, size: 14),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 10),
-
-            Text(
-              "Recent Activity",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            ListTile(
-              leading: Icon(Icons.assignment, color: Colors.blue),
-              title: Text("Reported Road Damage"),
-              subtitle: Text("Status: In Progress"),
-            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildServiceItem(BuildContext context, IconData icon, String title, Color color, Widget? targetScreen) {
+    return GestureDetector(
+      onTap: () {
+        if (targetScreen != null) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => targetScreen));
+        }
+      },
+      child: serviceCard(icon, title, color),
     );
   }
 
@@ -197,7 +203,15 @@ class HomeContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 30),
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              border: Border.all(color: Colors.lightBlue.shade300, width: 1.5),
+            ),
+            child: Icon(icon, color: Color(0xFF003366), size: 28),
+          ),
           SizedBox(height: 10),
           Text(
             title,

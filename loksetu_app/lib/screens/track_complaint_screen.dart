@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/complaint_data.dart';
+import '../models/complaint.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TrackComplaintScreen extends StatefulWidget {
   @override
@@ -13,28 +14,43 @@ class _TrackComplaintScreenState extends State<TrackComplaintScreen> {
   bool complaintFound = false;
   dynamic foundComplaint;
 
-  void _searchComplaint() {
-    String enteredId = complaintIdController.text.trim();
+  Future<void> _searchComplaint() async {
+    String enteredId = complaintIdController.text.trim().toUpperCase();
 
-    // Search for complaint in the list
-    dynamic complaint;
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(child: CircularProgressIndicator()),
+    );
+
     try {
-      complaint = complaints.firstWhere(
-        (c) => c.id.toUpperCase() == enteredId.toUpperCase(),
-      );
-    } catch (e) {
-      complaint = null;
-    }
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('complaints')
+          .doc(enteredId)
+          .get();
 
-    setState(() {
-      if (complaint != null) {
-        foundComplaint = complaint;
-        complaintFound = true;
-      } else {
+      Navigator.pop(context); // Close loading dialog
+
+      setState(() {
+        if (doc.exists) {
+          foundComplaint = Complaint.fromJson(doc.data() as Map<String, dynamic>, doc.id);
+          complaintFound = true;
+        } else {
+          complaintFound = false;
+        }
+        showDetails = true;
+      });
+    } catch (e) {
+      Navigator.pop(context); // Close loading dialog
+      setState(() {
         complaintFound = false;
-      }
-      showDetails = true;
-    });
+        showDetails = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error searching complaint: $e")),
+      );
+    }
   }
 
   @override

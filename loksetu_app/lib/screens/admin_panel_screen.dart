@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/complaint.dart';
-import '../data/complaint_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
 
@@ -32,139 +32,164 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Filter complaints based on selections
-    List<Complaint> filteredComplaints = complaints.where((c) {
-      bool matchesStatus = _selectedStatusFilter == 'All' || c.status == _selectedStatusFilter;
-      bool matchesCategory = _selectedCategoryFilter == 'All' || c.category == _selectedCategoryFilter;
-      return matchesStatus && matchesCategory;
-    }).toList();
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('complaints').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
 
-    int total = complaints.length;
-    int pending = complaints.where((c) => c.status == 'Submitted').length;
-    int resolved = complaints.where((c) => c.status == 'Resolved').length;
+        if (snapshot.hasError) {
+          return Scaffold(body: Center(child: Text("Error: ${snapshot.error}")));
+        }
 
-    return Scaffold(
-      backgroundColor: Color(0xFFF5F7FB),
-      appBar: AppBar(
-        title: Text("Admin Dashboard"),
-        backgroundColor: Color(0xFF6A11CB),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => LoginScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Stats Card
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Color(0xFF6A11CB),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
+        List<Complaint> allComplaints = snapshot.data!.docs.map((doc) {
+          return Complaint.fromJson(doc.data() as Map<String, dynamic>, doc.id);
+        }).toList();
+
+        // Filter complaints based on selections
+        List<Complaint> filteredComplaints = allComplaints.where((c) {
+          bool matchesStatus = _selectedStatusFilter == 'All' || c.status == _selectedStatusFilter;
+          bool matchesCategory = _selectedCategoryFilter == 'All' || c.category == _selectedCategoryFilter;
+          return matchesStatus && matchesCategory;
+        }).toList();
+
+        int total = allComplaints.length;
+        int pending = allComplaints.where((c) => c.status == 'Submitted').length;
+        int resolved = allComplaints.where((c) => c.status == 'Resolved').length;
+
+        return Scaffold(
+          backgroundColor: Color(0xFFF5F7FB),
+          appBar: AppBar(
+            title: Text("Admin Dashboard"),
+            backgroundColor: Color(0xFF6A11CB),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.logout),
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => LoginScreen()),
+                  );
+                },
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildStatItem("Total", total.toString(), Icons.analytics),
-                _buildStatItem("Pending", pending.toString(), Icons.pending_actions),
-                _buildStatItem("Resolved", resolved.toString(), Icons.check_circle_outline),
-              ],
-            ),
+            ],
           ),
-
-          // Filters
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Filter by Status", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700])),
-                SizedBox(height: 8),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: _statusFilters.map((status) => Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        label: Text(status),
-                        selected: _selectedStatusFilter == status,
-                        onSelected: (bool selected) {
-                          setState(() {
-                            _selectedStatusFilter = status;
-                          });
-                        },
-                        selectedColor: Color(0xFF6A11CB).withOpacity(0.2),
-                        checkmarkColor: Color(0xFF6A11CB),
-                      ),
-                    )).toList(),
+          body: Column(
+            children: [
+              // Stats Card
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Color(0xFF6A11CB),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
                   ),
                 ),
-                SizedBox(height: 12),
-                Text("Filter by Category", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700])),
-                SizedBox(height: 8),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: _categoryFilters.map((category) => Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        label: Text(category),
-                        selected: _selectedCategoryFilter == category,
-                        onSelected: (bool selected) {
-                          setState(() {
-                            _selectedCategoryFilter = category;
-                          });
-                        },
-                        selectedColor: Colors.blue.withOpacity(0.2),
-                        checkmarkColor: Colors.blue,
-                      ),
-                    )).toList(),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildStatItem("Total", total.toString(), Icons.analytics),
+                    _buildStatItem("Pending", pending.toString(), Icons.pending_actions),
+                    _buildStatItem("Resolved", resolved.toString(), Icons.check_circle_outline),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          Expanded(
-            child: filteredComplaints.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.inbox, size: 60, color: Colors.grey[400]),
-                        SizedBox(height: 16),
-                        Text("No complaints found", style: TextStyle(fontSize: 18, color: Colors.grey[600])),
-                      ],
+              // Filters
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Filter by Status", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700])),
+                    SizedBox(height: 8),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _statusFilters.map((status) => Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(status),
+                            selected: _selectedStatusFilter == status,
+                            onSelected: (bool selected) {
+                              setState(() {
+                                _selectedStatusFilter = status;
+                              });
+                            },
+                            selectedColor: Color(0xFF6A11CB).withOpacity(0.2),
+                            checkmarkColor: Color(0xFF6A11CB),
+                          ),
+                        )).toList(),
+                      ),
                     ),
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.all(16),
-                    itemCount: filteredComplaints.length,
-                    itemBuilder: (context, index) {
-                      return _buildAdminComplaintCard(filteredComplaints[index]);
-                    },
-                  ),
+                    SizedBox(height: 12),
+                    Text("Filter by Category", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700])),
+                    SizedBox(height: 8),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _categoryFilters.map((category) => Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(category),
+                            selected: _selectedCategoryFilter == category,
+                            onSelected: (bool selected) {
+                              setState(() {
+                                _selectedCategoryFilter = category;
+                              });
+                            },
+                            selectedColor: Colors.blue.withOpacity(0.2),
+                            checkmarkColor: Colors.blue,
+                          ),
+                        )).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Expanded(
+                child: filteredComplaints.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.inbox, size: 60, color: Colors.grey[400]),
+                            SizedBox(height: 16),
+                            Text("No complaints found", style: TextStyle(fontSize: 18, color: Colors.grey[600])),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: EdgeInsets.all(16),
+                        itemCount: filteredComplaints.length,
+                        itemBuilder: (context, index) {
+                          return _buildAdminComplaintCard(filteredComplaints[index]);
+                        },
+                      ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildStatItem(String title, String count, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white70, size: 28),
+        Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            border: Border.all(color: Colors.lightBlue.shade300, width: 1.5),
+          ),
+          child: Icon(icon, color: Color(0xFF003366), size: 28),
+        ),
         SizedBox(height: 8),
         Text(count, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
         Text(title, style: TextStyle(color: Colors.white70)),
@@ -211,7 +236,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               SizedBox(height: 8),
               Text(complaint.title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
               SizedBox(height: 4),
-              Text("Category: ${complaint.category} • ${complaint.timestamp.substring(0, 10)}", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+              Text("Category: ${complaint.category} • ${complaint.timestamp.length > 10 ? complaint.timestamp.substring(0, 10) : complaint.timestamp}", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
               if (complaint.submittedBy != null) ...[
                 SizedBox(height: 4),
                 Text("By: ${complaint.submittedBy}", style: TextStyle(fontSize: 12, color: Colors.blue[700], fontStyle: FontStyle.italic)),
@@ -291,15 +316,23 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                               backgroundColor: Color(0xFF6A11CB),
                               padding: EdgeInsets.symmetric(vertical: 14),
                             ),
-                            onPressed: () {
-                              // Update the global list item
-                              setState(() {
-                                complaint.status = currentStatus;
-                              });
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Status updated to $currentStatus'), backgroundColor: Colors.green),
-                              );
+                            onPressed: () async {
+                              // Update Firestore
+                              try {
+                                await FirebaseFirestore.instance
+                                    .collection('complaints')
+                                    .doc(complaint.id)
+                                    .update({'status': currentStatus});
+                                    
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Status updated to $currentStatus'), backgroundColor: Colors.green),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error updating status: $e'), backgroundColor: Colors.red),
+                                );
+                              }
                             },
                             child: Text("Save Changes", style: TextStyle(fontSize: 16, color: Colors.white)),
                           ),
