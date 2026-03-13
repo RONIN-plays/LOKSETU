@@ -101,59 +101,47 @@ class HomeContent extends StatelessWidget {
                   ),
                   SizedBox(height: 35),
 
-                  // Horizontal Scrollable Cards (Matching the user's image style)
-                  SizedBox(
-                    height: 300,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _buildServiceCard(
-                          context,
-                          Icons.report_problem_outlined,
-                          "Report Issue",
-                          "Found a problem? Report it here for resolution.",
-                          Color(0xFFE3F2FD),
-                          "Report",
-                          ReportIssueScreen(),
-                        ),
-                        _buildServiceCard(
-                          context,
-                          Icons.track_changes_outlined,
-                          "Track Status",
-                          "Stay updated on the status of your reported issues.",
-                          Color(0xFFFFF3E0),
-                          "Track",
-                          TrackComplaintScreen(),
-                        ),
-                        _buildServiceCard(
-                          context,
-                          Icons.map_outlined,
-                          "Village Issues",
-                          "View and contribute to issues in your village.",
-                          Color(0xFFF1F8E9),
-                          "View Map",
-                          VillageIssuesScreen(),
-                        ),
-                        _buildServiceCard(
-                          context,
-                          Icons.account_balance_outlined,
-                          "Govt Schemes",
-                          "Explore welfare schemes and benefits for you.",
-                          Color(0xFFF3E5F5),
-                          "Explore",
-                          GovtSchemesScreen(),
-                        ),
-                        _buildServiceCard(
-                          context,
-                          Icons.phone_in_talk_outlined,
-                          "Helpline",
-                          "Need urgent help? Connect with emergency services.",
-                          Color(0xFFFFEBEE),
-                          "Call Now",
-                          HelplineScreen(),
-                        ),
-                      ],
-                    ),
+                  // Vertical Service Cards (Matching the user's image style)
+                  _buildVerticalServiceCard(
+                    context,
+                    Icons.report_problem_outlined,
+                    "Report Issue",
+                    "Found a problem? Report it here.",
+                    "Quick resolution for your community issues.",
+                    ReportIssueScreen(),
+                  ),
+                  _buildVerticalServiceCard(
+                    context,
+                    Icons.track_changes_outlined,
+                    "Track Status",
+                    "Track your reported issues.",
+                    "Stay updated on the progress in real-time.",
+                    TrackComplaintScreen(),
+                  ),
+
+                  _buildVerticalServiceCard(
+                    context,
+                    Icons.map_outlined,
+                    "Village Issues",
+                    "Found a problem in your village?",
+                    "Collaborate with your community to fix it.",
+                    VillageIssuesScreen(),
+                  ),
+                  _buildVerticalServiceCard(
+                    context,
+                    Icons.account_balance_outlined,
+                    "Govt Schemes",
+                    "Check your eligibility for schemes.",
+                    "Access government benefits and welfare.",
+                    GovtSchemesScreen(),
+                  ),
+                  _buildVerticalServiceCard(
+                    context,
+                    Icons.phone_in_talk_outlined,
+                    "Helpline",
+                    "Need immediate assistance?",
+                    "Connect with emergency and support services.",
+                    HelplineScreen(),
                   ),
                   
                   SizedBox(height: 30),
@@ -198,105 +186,115 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceCard(
-    BuildContext context, 
-    IconData icon, 
-    String title, 
-    String subtitle, 
-    Color color, 
-    String buttonText,
-    Widget? targetScreen
+  Widget _buildVerticalServiceCard(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String mainSubtitle,
+    String secondarySubtitle,
+    Widget? targetScreen,
   ) {
-    return Container(
-      width: 160,
-      margin: EdgeInsets.only(right: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Top Colored Part
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.all(16),
+    return GestureDetector(
+      onTap: () {
+        if (targetScreen != null) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => targetScreen));
+        }
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Top Gradient Border
+            Container(
+              height: 4,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: color,
+                gradient: LinearGradient(
+                  colors: [Color(0xFF001F3F), Color(0xFF00A8E8)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
                 ),
               ),
-              child: Column(
+            ),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Icon
                   Container(
-                    padding: EdgeInsets.all(8),
+                    padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white,
                       shape: BoxShape.circle,
+                      border: Border.all(color: Colors.blue.shade100, width: 2),
                     ),
-                    child: Icon(icon, color: Color(0xFF003366), size: 30),
+                    child: Icon(icon, color: Color(0xFF003366), size: 28),
                   ),
-                  SizedBox(height: 12),
-                  Text(
-                    title,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF003366)),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    subtitle,
-                    style: TextStyle(fontSize: 11, color: Colors.black54, height: 1.3),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+                  SizedBox(width: 16),
+                  // Text Content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              title,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF333333),
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                          ],
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          mainSubtitle,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          secondarySubtitle,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
-          // Bottom White Part
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                if (targetScreen != null) {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => targetScreen));
-                }
-              },
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 12),
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      buttonText,
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6A11CB), fontSize: 13),
-                    ),
-                    SizedBox(width: 4),
-                    Icon(Icons.arrow_forward, size: 14, color: Color(0xFF6A11CB)),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+
+
 }
 
 class ProfileScreen extends StatelessWidget {
