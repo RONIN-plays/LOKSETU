@@ -17,6 +17,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
   // Form fields
   String title = '';
   String description = '';
+  String location = ''; // New field
   String category = 'Water';
   List<String> categories = [
     'Water',
@@ -40,7 +41,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
         scheme: 'sms',
         path: '+918274819946', // Admin Phone Number
         queryParameters: <String, String>{
-          'body': 'LokSetu Emergency Report\nCategory: $category\nTitle: $title\nDescription: $description'
+          'body': 'LokSetu Emergency Report\nCategory: $category\nTitle: $title\nLocation: $location\nDescription: $description'
         },
       );
 
@@ -123,6 +124,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
         category: category,
         timestamp: DateTime.now().toString(),
         submittedBy: FirebaseAuth.instance.currentUser?.email ?? 'Anonymous',
+        location: location,
       );
 
       await FirebaseFirestore.instance.collection('complaints').doc(id).set(complaint.toJson());
@@ -286,6 +288,18 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                 validator: (value) =>
                     value == null || value.isEmpty ? "Enter description" : null,
                 onSaved: (value) => description = value!,
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: "Location",
+                  hintText: "e.g. Near Central Park",
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.location_on),
+                ),
+                validator: (value) =>
+                    value == null || value.isEmpty ? "Enter location" : null,
+                onSaved: (value) => location = value!,
               ),
               SizedBox(height: 16),
               DropdownButtonFormField<String>(

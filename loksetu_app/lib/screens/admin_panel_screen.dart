@@ -354,10 +354,24 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               Text(complaint.title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
               SizedBox(height: 4),
               Text("Category: ${complaint.category} • ${complaint.timestamp.length > 10 ? complaint.timestamp.substring(0, 10) : complaint.timestamp}", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-              if (complaint.submittedBy != null) ...[
-                SizedBox(height: 4),
+              SizedBox(height: 4),
+              if (complaint.submittedBy != null)
                 Text("By: ${complaint.submittedBy}", style: TextStyle(fontSize: 12, color: Colors.blue[700], fontStyle: FontStyle.italic)),
-              ]
+              SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.location_on, size: 14, color: Colors.grey[600]),
+                  SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      complaint.location,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -395,6 +409,16 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                         Text(complaint.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         SizedBox(height: 10),
                         Text(complaint.description, style: TextStyle(fontSize: 14)),
+                        SizedBox(height: 20),
+                        
+                        Text("Location:", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Row(
+                          children: [
+                            Icon(Icons.location_on, size: 16, color: Colors.red),
+                            SizedBox(width: 4),
+                            Expanded(child: Text(complaint.location, style: TextStyle(fontSize: 14))),
+                          ],
+                        ),
                         SizedBox(height: 20),
                         
                         if (complaint.submittedBy != null) ...[

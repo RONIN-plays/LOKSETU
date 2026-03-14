@@ -6,6 +6,7 @@ class Complaint {
   final String timestamp;
   String status;
   final String? submittedBy;
+  final String location; // New field
 
   Complaint({
     required this.id,
@@ -15,6 +16,7 @@ class Complaint {
     required this.timestamp,
     this.status = 'Submitted',
     this.submittedBy,
+    required this.location,
   });
 
   factory Complaint.fromJson(Map<String, dynamic> json, String docId) {
@@ -26,6 +28,7 @@ class Complaint {
       timestamp: json['timestamp'] ?? '',
       status: json['status'] ?? 'Submitted',
       submittedBy: json['submittedBy'],
+      location: json['location'] ?? '',
     );
   }
 
@@ -37,6 +40,7 @@ class Complaint {
       'timestamp': timestamp,
       'status': status,
       'submittedBy': submittedBy,
+      'location': location,
     };
   }
 }
