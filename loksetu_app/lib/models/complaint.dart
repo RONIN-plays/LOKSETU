@@ -5,6 +5,7 @@ class Complaint {
   final String category;
   final String timestamp;
   String status;
+  final String? submittedBy;
 
   Complaint({
     required this.id,
@@ -13,5 +14,6 @@ class Complaint {
     required this.category,
     required this.timestamp,
     this.status = 'Submitted',
+    this.submittedBy,
   });
 }
