@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../data/complaint_data.dart';
+import '../models/complaint.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MyComplaintsScreen extends StatefulWidget {
   @override
@@ -9,12 +12,38 @@ class MyComplaintsScreen extends StatefulWidget {
 class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
   @override
   Widget build(BuildContext context) {
+    String? userEmail = FirebaseAuth.instance.currentUser?.email;
+
     return Scaffold(
       appBar: AppBar(
         title: Text("My Complaints"),
         backgroundColor: Color(0xFF6A11CB),
       ),
-      body: complaints.isEmpty ? _buildEmptyState() : _buildComplaintsList(),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('complaints')
+            .where('submittedBy', isEqualTo: userEmail)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          List<Complaint> userComplaints = snapshot.data!.docs.map((doc) {
+            return Complaint.fromJson(doc.data() as Map<String, dynamic>, doc.id);
+          }).toList();
+
+          return _buildComplaintsList(userComplaints);
+        },
+      ),
     );
   }
 
@@ -55,12 +84,12 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
     );
   }
 
-  Widget _buildComplaintsList() {
+  Widget _buildComplaintsList(List<Complaint> complaintsList) {
     return ListView.builder(
       padding: EdgeInsets.all(16),
-      itemCount: complaints.length,
+      itemCount: complaintsList.length,
       itemBuilder: (context, index) {
-        final complaint = complaints[index];
+        final complaint = complaintsList[index];
         return _buildComplaintCard(complaint);
       },
     );
@@ -440,7 +469,12 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                     backgroundColor: Colors.green,
                                     padding: EdgeInsets.symmetric(vertical: 10),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    final Uri url = Uri.parse('tel:1800123456'); // Placeholder helpline
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    }
+                                  },
                                   icon: Icon(Icons.call_rounded),
                                   label: Text("Call"),
                                 ),
@@ -452,7 +486,12 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                                     backgroundColor: Colors.blue,
                                     padding: EdgeInsets.symmetric(vertical: 10),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    final Uri url = Uri.parse('mailto:support@loksetu.com?subject=Inquiry about Complaint ${complaint.id}');
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    }
+                                  },
                                   icon: Icon(Icons.email_rounded),
                                   label: Text("Email"),
                                 ),
