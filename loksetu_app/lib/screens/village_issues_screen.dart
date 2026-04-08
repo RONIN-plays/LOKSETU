@@ -6,9 +6,12 @@ class VillageIssuesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFF001F3F),
       appBar: AppBar(
-        title: const Text("Village Issues"),
-        backgroundColor: Colors.deepPurple,
+        title: const Text("Village Issues", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Color(0xFF001F3F),
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -16,62 +19,64 @@ class VillageIssuesScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Total Issues Card
-            Card(
-              elevation: 3,
-              child: ListTile(
-                leading: const Icon(Icons.report_problem, color: Colors.red),
-                title: const Text("Total Issues"),
-                subtitle: const Text("32 complaints reported"),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Color(0xFFE3F2FD).withOpacity(0.95),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Color(0xFF00A8E8).withOpacity(0.4), width: 1.5),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.18), blurRadius: 10, offset: Offset(0, 4))],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: [Color(0xFF00A8E8), Color(0xFF003366)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.report_problem, color: Colors.white, size: 22),
+                  ),
+                  SizedBox(width: 14),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Total Issues", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF003366))),
+                      Text("32 complaints reported", style: TextStyle(fontSize: 13, color: Color(0xFF0288D1))),
+                    ],
+                  ),
+                ],
               ),
             ),
 
-            const SizedBox(height: 15),
+            SizedBox(height: 20),
 
-            const Text(
-              "Category Statistics",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 10),
+            Text("Category Statistics", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+            SizedBox(height: 12),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                issueCard("Water", 14, Colors.blue),
-                issueCard("Road", 9, Colors.orange),
-                issueCard("Sanitation", 6, Colors.green),
+                _issueCard("Water", 14, Icons.water_drop_outlined),
+                _issueCard("Road", 9, Icons.add_road),
+                _issueCard("Sanitation", 6, Icons.cleaning_services_outlined),
               ],
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 24),
 
-            const Text(
-              "Recent Complaints",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 10),
+            Text("Recent Complaints", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+            SizedBox(height: 12),
 
             Expanded(
               child: ListView(
-                children: const [
-                  ListTile(
-                    leading: Icon(Icons.water_drop, color: Colors.blue),
-                    title: Text("Dirty water supply"),
-                    subtitle: Text("Reported yesterday"),
-                  ),
-
-                  ListTile(
-                    leading: Icon(Icons.add_road, color: Colors.orange),
-                    title: Text("Broken road near school"),
-                    subtitle: Text("Reported 2 days ago"),
-                  ),
-
-                  ListTile(
-                    leading: Icon(Icons.cleaning_services, color: Colors.green),
-                    title: Text("Garbage pile near market"),
-                    subtitle: Text("Reported today"),
-                  ),
+                children: [
+                  _complaintTile(Icons.water_drop, "Dirty water supply", "Reported yesterday"),
+                  SizedBox(height: 10),
+                  _complaintTile(Icons.add_road, "Broken road near school", "Reported 2 days ago"),
+                  SizedBox(height: 10),
+                  _complaintTile(Icons.cleaning_services, "Garbage pile near market", "Reported today"),
                 ],
               ),
             ),
@@ -81,26 +86,56 @@ class VillageIssuesScreen extends StatelessWidget {
     );
   }
 
-  static Widget issueCard(String title, int count, Color color) {
-    return Card(
-      elevation: 3,
-      child: Container(
-        width: 100,
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Text(
-              "$count",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+  Widget _issueCard(String title, int count, IconData icon) {
+    return Container(
+      width: 100,
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Color(0xFFE3F2FD).withOpacity(0.95),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Color(0xFF00A8E8).withOpacity(0.4)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: Offset(0, 4))],
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: Color(0xFF00A8E8), size: 24),
+          SizedBox(height: 4),
+          Text("$count", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF003366))),
+          SizedBox(height: 2),
+          Text(title, style: TextStyle(fontSize: 11, color: Color(0xFF0288D1), fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  Widget _complaintTile(IconData icon, String title, String subtitle) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Color(0xFFE3F2FD).withOpacity(0.95),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Color(0xFF00A8E8).withOpacity(0.3), width: 1.5),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 6, offset: Offset(0, 3))],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [Color(0xFF00A8E8), Color(0xFF003366)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: 5),
-            Text(title),
-          ],
-        ),
+            child: Icon(icon, color: Colors.white, size: 18),
+          ),
+          SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF003366), fontSize: 14)),
+              Text(subtitle, style: TextStyle(fontSize: 12, color: Color(0xFF0288D1))),
+            ],
+          ),
+        ],
       ),
     );
   }

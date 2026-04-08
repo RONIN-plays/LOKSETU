@@ -83,13 +83,16 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         });
 
         return Scaffold(
-          backgroundColor: Color(0xFFF5F7FB),
+          backgroundColor: Color(0xFF001F3F), // Navy Blue Background
           appBar: AppBar(
-            title: Text("Admin Dashboard"),
-            backgroundColor: Color(0xFF6A11CB),
+            title: Text("Admin Dashboard", style: TextStyle(color: Color(0xFF001F3F), fontWeight: FontWeight.bold, letterSpacing: 1)),
+            backgroundColor: Colors.white.withOpacity(0.92), // Matching login box color
+            centerTitle: true,
+            elevation: 4,
+            iconTheme: IconThemeData(color: Color(0xFF001F3F)),
             actions: [
               IconButton(
-                icon: Icon(Icons.logout),
+                icon: Icon(Icons.logout, color: Color(0xFF001F3F)),
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
                   Navigator.pushReplacement(
@@ -100,216 +103,220 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               ),
             ],
           ),
-          body: Column(
-            children: [
-              // Stats Card
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Color(0xFF6A11CB),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(24),
-                    bottomRight: Radius.circular(24),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildStatItem("Total", total.toString(), Icons.analytics),
-                    _buildStatItem("Pending", pending.toString(), Icons.pending_actions),
-                    _buildStatItem("Resolved", resolved.toString(), Icons.check_circle_outline),
-                  ],
-                ),
-              ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: 16), // Padding since banner is removed
 
-              // Search Bar
-              Padding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 4, offset: Offset(0, 2))
-                    ],
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: "Search by Complaint ID",
-                      prefixIcon: Icon(Icons.search, color: Color(0xFF6A11CB)),
-                      suffixIcon: _searchQuery.isNotEmpty 
-                        ? IconButton(
-                            icon: Icon(Icons.clear, color: Colors.grey),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() {
-                                _searchQuery = '';
-                              });
-                            },
-                          ) 
-                        : null,
-                      filled: true,
-                      fillColor: Colors.transparent, // Color is now handled by Container
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Most Frequent Category Card
-              if (mostFrequentCategory != null && _searchQuery.isEmpty)
+                // Stats Card
                 Container(
-                  margin: EdgeInsets.all(16),
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, 24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.shade200, width: 2),
-                    boxShadow: [
-                      BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 4, offset: Offset(0, 2))
-                    ],
+                    color: Color(0xFF001F3F),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Container(
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.trending_up, color: Colors.blue, size: 28),
+                      _buildStatItem("Total", total.toString(), Icons.analytics_outlined, Color(0xFF00A8E8)),
+                      _buildStatItem("Pending", pending.toString(), Icons.pending_actions_outlined, Colors.orangeAccent),
+                      _buildStatItem("Resolved", resolved.toString(), Icons.check_circle_outline, Colors.greenAccent),
+                    ],
+                  ),
+                ),
+
+                // Search Bar
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      style: TextStyle(color: Colors.white),
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Search by Complaint ID",
+                        hintStyle: TextStyle(color: Colors.white54),
+                        prefixIcon: Icon(Icons.search, color: Color(0xFF00A8E8)),
+                        suffixIcon: _searchQuery.isNotEmpty 
+                          ? IconButton(
+                              icon: Icon(Icons.clear, color: Colors.white54),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              },
+                            ) 
+                          : null,
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Most Frequent Issue Category",
-                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ),
+                ),
+
+                // Most Frequent Category Card
+                if (mostFrequentCategory != null && _searchQuery.isEmpty)
+                  Container(
+                    margin: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFE3F2FD).withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Color(0xFF00A8E8).withOpacity(0.4), width: 1.5),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: Offset(0, 4))
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFF00A8E8), Color(0xFF003366)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              mostFrequentCategory!,
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF6A11CB)),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.trending_up, color: Colors.white, size: 28),
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Frequent Issue Category",
+                                style: TextStyle(fontSize: 12, color: Color(0xFF546E7A), fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                mostFrequentCategory!,
+                                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF003366)),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                "$maxCount complaints found",
+                                style: TextStyle(fontSize: 12, color: Color(0xFF0288D1), fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                // Filters
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Filter by Status", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70, fontSize: 13)),
+                      SizedBox(height: 8),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: _statusFilters.map((status) => Padding(
+                            padding: EdgeInsets.only(right: 8),
+                            child: FilterChip(
+                              label: Text(status, style: TextStyle(color: Color(0xFF001F3F), fontWeight: FontWeight.bold)),
+                              selected: _selectedStatusFilter == status,
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  _selectedStatusFilter = status;
+                                });
+                              },
+                              backgroundColor: Colors.white,
+                              selectedColor: Color(0xFF00A8E8),
+                              checkmarkColor: Color(0xFF001F3F),
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              "$maxCount complaints",
-                              style: TextStyle(fontSize: 12, color: Colors.blue[600]),
+                          )).toList(),
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Text("Filter by Category", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70, fontSize: 13)),
+                      SizedBox(height: 8),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: _categoryFilters.map((category) => Padding(
+                            padding: EdgeInsets.only(right: 8),
+                            child: FilterChip(
+                              label: Text(category, style: TextStyle(color: Color(0xFF001F3F), fontWeight: FontWeight.bold)),
+                              selected: _selectedCategoryFilter == category,
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  _selectedCategoryFilter = category;
+                                });
+                              },
+                              backgroundColor: Colors.white,
+                              selectedColor: Color(0xFF00A8E8),
+                              checkmarkColor: Color(0xFF001F3F),
                             ),
-                          ],
+                          )).toList(),
                         ),
                       ),
                     ],
                   ),
                 ),
 
-              // Filters
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Filter by Status", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700])),
-                    SizedBox(height: 8),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: _statusFilters.map((status) => Padding(
-                          padding: EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            label: Text(status),
-                            selected: _selectedStatusFilter == status,
-                            onSelected: (bool selected) {
-                              setState(() {
-                                _selectedStatusFilter = status;
-                              });
-                            },
-                            selectedColor: Color(0xFF6A11CB).withOpacity(0.2),
-                            checkmarkColor: Color(0xFF6A11CB),
+                filteredComplaints.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 60),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.inbox, size: 60, color: Colors.white24),
+                              SizedBox(height: 16),
+                              Text("No complaints found", style: TextStyle(fontSize: 18, color: Colors.white54)),
+                            ],
                           ),
-                        )).toList(),
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    Text("Filter by Category", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700])),
-                    SizedBox(height: 8),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: _categoryFilters.map((category) => Padding(
-                          padding: EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            label: Text(category),
-                            selected: _selectedCategoryFilter == category,
-                            onSelected: (bool selected) {
-                              setState(() {
-                                _selectedCategoryFilter = category;
-                              });
-                            },
-                            selectedColor: Colors.blue.withOpacity(0.2),
-                            checkmarkColor: Colors.blue,
-                          ),
-                        )).toList(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Expanded(
-                child: filteredComplaints.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.inbox, size: 60, color: Colors.grey[400]),
-                            SizedBox(height: 16),
-                            Text("No complaints found", style: TextStyle(fontSize: 18, color: Colors.grey[600])),
-                          ],
                         ),
                       )
                     : ListView.builder(
                         padding: EdgeInsets.all(16),
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
                         itemCount: filteredComplaints.length,
                         itemBuilder: (context, index) {
                           return _buildAdminComplaintCard(filteredComplaints[index]);
                         },
                       ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildStatItem(String title, String count, IconData icon) {
+  Widget _buildStatItem(String title, String count, IconData icon, Color color) {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.all(8),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white,
-            border: Border.all(color: Colors.lightBlue.shade300, width: 1.5),
+            color: color.withOpacity(0.1),
+            border: Border.all(color: color.withOpacity(0.5), width: 1.5),
           ),
-          child: Icon(icon, color: Color(0xFF003366), size: 28),
+          child: Icon(icon, color: color, size: 26),
         ),
-        SizedBox(height: 8),
-        Text(count, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-        Text(title, style: TextStyle(color: Colors.white70)),
+        SizedBox(height: 10),
+        Text(count, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white)),
+        Text(title, style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 0.5)),
       ],
     );
   }
@@ -317,59 +324,89 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   Widget _buildAdminComplaintCard(Complaint complaint) {
     Color statusColor;
     switch (complaint.status.toLowerCase()) {
-      case 'submitted': statusColor = Colors.blue; break;
+      case 'submitted': statusColor = Color(0xFF00A8E8); break;
       case 'in progress': statusColor = Colors.orange; break;
       case 'resolved': statusColor = Colors.green; break;
       case 'rejected': statusColor = Colors.red; break;
       default: statusColor = Colors.grey;
     }
 
-    return Card(
+    return Container(
       margin: EdgeInsets.only(bottom: 16),
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: Color(0xFFE3F2FD).withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Color(0xFF00A8E8).withOpacity(0.3), width: 1.5),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 8, offset: Offset(0, 4))],
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         onTap: () => _showAdminComplaintDetails(complaint),
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(complaint.id, style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6A11CB))),
+                  Text(complaint.id, style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF003366), fontSize: 13, letterSpacing: 0.5)),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
+                      color: statusColor.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: statusColor.withOpacity(0.3)),
                     ),
-                    child: Text(complaint.status, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: statusColor)),
+                    child: Text(complaint.status.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: statusColor, letterSpacing: 0.5)),
                   ),
                 ],
               ),
-              SizedBox(height: 8),
-              Text(complaint.title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-              SizedBox(height: 4),
-              Text("Category: ${complaint.category} • ${complaint.timestamp.length > 10 ? complaint.timestamp.substring(0, 10) : complaint.timestamp}", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-              SizedBox(height: 4),
-              if (complaint.submittedBy != null)
-                Text("By: ${complaint.submittedBy}", style: TextStyle(fontSize: 12, color: Colors.blue[700], fontStyle: FontStyle.italic)),
-              SizedBox(height: 4),
+              SizedBox(height: 12),
+              Text(complaint.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF003366)), maxLines: 1, overflow: TextOverflow.ellipsis),
+              SizedBox(height: 6),
               Row(
                 children: [
-                  Icon(Icons.location_on, size: 14, color: Colors.grey[600]),
+                  Icon(Icons.category_outlined, size: 14, color: Color(0xFF546E7A)),
+                  SizedBox(width: 4),
+                  Text("${complaint.category}", style: TextStyle(fontSize: 12, color: Color(0xFF546E7A), fontWeight: FontWeight.w600)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text("•", style: TextStyle(color: Color(0xFFB0BEC5))),
+                  ),
+                  Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF546E7A)),
+                  SizedBox(width: 4),
+                  Text("${complaint.timestamp.length > 10 ? complaint.timestamp.substring(0, 10) : complaint.timestamp}", style: TextStyle(fontSize: 12, color: Color(0xFF546E7A), fontWeight: FontWeight.w600)),
+                ],
+              ),
+              SizedBox(height: 8),
+              if (complaint.submittedBy != null)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: Color(0xFF003366).withOpacity(0.05), borderRadius: BorderRadius.circular(8)),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.person_outline, size: 14, color: Color(0xFF0288D1)),
+                      SizedBox(width: 4),
+                      Text("By: ${complaint.submittedBy}", style: TextStyle(fontSize: 11, color: Color(0xFF0288D1), fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.location_on_outlined, size: 14, color: Color(0xFFF44336)),
                   SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       complaint.location,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 12, color: Color(0xFF546E7A), fontWeight: FontWeight.w500),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  Icon(Icons.arrow_forward_ios, size: 12, color: Color(0xFFB0BEC5)),
                 ],
               ),
             ],
@@ -394,44 +431,62 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               initialChildSize: 0.6,
               maxChildSize: 0.9,
               builder: (context, scrollController) {
-                return Container(
-                  padding: EdgeInsets.all(20),
+                  return Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFFE3F2FD),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  padding: EdgeInsets.all(24),
                   child: SingleChildScrollView(
                     controller: scrollController,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Update Issue Status", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        Divider(height: 30),
+                        Center(
+                          child: Container(
+                            width: 50,
+                            height: 5,
+                            decoration: BoxDecoration(color: Color(0xFFB0BEC5), borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                        Text("Update Issue Status", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF003366))),
+                        Divider(height: 40, thickness: 1.5, color: Color(0xFF00A8E8).withOpacity(0.2)),
                         
-                        Text("Complaint ID: ${complaint.id}", style: TextStyle(color: Colors.grey[600])),
-                        SizedBox(height: 10),
-                        Text(complaint.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 10),
-                        Text(complaint.description, style: TextStyle(fontSize: 14)),
-                        SizedBox(height: 20),
+                        Text("COMPLAINT ID: ${complaint.id}", style: TextStyle(color: Color(0xFF546E7A), fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1)),
+                        SizedBox(height: 12),
+                        Text(complaint.title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF003366))),
+                        SizedBox(height: 12),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Color(0xFF00A8E8).withOpacity(0.1))),
+                          child: Text(complaint.description, style: TextStyle(fontSize: 14, color: Color(0xFF37474F), height: 1.5)),
+                        ),
+                        SizedBox(height: 24),
                         
-                        Text("Location:", style: TextStyle(fontWeight: FontWeight.bold)),
                         Row(
                           children: [
-                            Icon(Icons.location_on, size: 16, color: Colors.red),
-                            SizedBox(width: 4),
-                            Expanded(child: Text(complaint.location, style: TextStyle(fontSize: 14))),
+                            Icon(Icons.location_on, size: 18, color: Color(0xFFF44336)),
+                            SizedBox(width: 8),
+                            Expanded(child: Text(complaint.location, style: TextStyle(fontSize: 14, color: Color(0xFF546E7A), fontWeight: FontWeight.w600))),
                           ],
                         ),
-                        SizedBox(height: 20),
+                        SizedBox(height: 24),
                         
                         if (complaint.submittedBy != null) ...[
-                          Text("Reporter Details:", style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text(complaint.submittedBy!),
-                          SizedBox(height: 20),
+                          Text("Reporter:", style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF003366), fontSize: 13)),
+                          SizedBox(height: 8),
+                          Text(complaint.submittedBy!, style: TextStyle(color: Color(0xFF0288D1), fontWeight: FontWeight.bold)),
+                          SizedBox(height: 24),
                         ],
                         
-                        Text("Current Status:", style: TextStyle(fontWeight: FontWeight.bold)),
-                        SizedBox(height: 10),
+                        Text("Set New Status:", style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF003366), fontSize: 13)),
+                        SizedBox(height: 12),
                         
                         DropdownButtonFormField<String>(
                           value: currentStatus,
+                          dropdownColor: Colors.white,
+                          style: TextStyle(color: Color(0xFF003366), fontWeight: FontWeight.w700),
                           items: ['Submitted', 'In Progress', 'Resolved', 'Rejected']
                               .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                               .toList(),
@@ -443,19 +498,25 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                             }
                           },
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Color(0xFF00A8E8).withOpacity(0.3))),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Color(0xFF00A8E8), width: 1.5)),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           ),
                         ),
                         
-                        SizedBox(height: 30),
+                        SizedBox(height: 32),
                         
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF6A11CB),
-                              padding: EdgeInsets.symmetric(vertical: 14),
+                              backgroundColor: Color(0xFF00A8E8),
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 4,
                             ),
                             onPressed: () async {
                               // Update Firestore
@@ -467,7 +528,13 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                                     
                                 Navigator.pop(context);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Status updated to $currentStatus'), backgroundColor: Colors.green),
+                                  SnackBar(
+                                    content: Text('Status updated to $currentStatus'), 
+                                    backgroundColor: Color(0xFF003366),
+                                    behavior: SnackBarBehavior.floating,
+                                    margin: EdgeInsets.all(16),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
                                 );
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -475,7 +542,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                                 );
                               }
                             },
-                            child: Text("Save Changes", style: TextStyle(fontSize: 16, color: Colors.white)),
+                            child: Text("SAVE STATUS", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1)),
                           ),
                         )
                       ],

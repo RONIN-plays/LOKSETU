@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/complaint.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ReportIssueScreen extends StatefulWidget {
   @override
@@ -26,6 +28,58 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
     'Electricity',
     'Other',
   ];
+
+  // Features state
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
+  
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  final TextEditingController _descController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+  @override
+  void dispose() {
+    _descController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) {},
+        onError: (val) {},
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _descController.text = val.recognizedWords;
+              description = val.recognizedWords;
+            });
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
 
   Future<void> submitComplaint() async {
     if (!_formKey.currentState!.validate()) return;
@@ -116,11 +170,16 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
 
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       String id = 'LS${timestamp.substring(timestamp.length - 4)}';
+      String photoUrl = ''; // Placeholder till actual Firebase Storage is connected
+      if (_imageFile != null) {
+        // Will be uploaded to Firebase Storage when configured
+        photoUrl = _imageFile!.path;
+      }
 
       Complaint complaint = Complaint(
         id: id,
         title: title,
-        description: description,
+        description: _descController.text.isNotEmpty ? _descController.text : description,
         category: category,
         timestamp: DateTime.now().toString(),
         submittedBy: FirebaseAuth.instance.currentUser?.email ?? 'Anonymous',
@@ -237,6 +296,8 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                   _formKey.currentState!.reset();
                   setState(() {
                     category = 'Water';
+                    _imageFile = null;
+                    _descController.clear();
                   });
                 },
                 child: Text(
@@ -259,78 +320,171 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFF001F3F),
       appBar: AppBar(
-        title: Text("Submit Complaint"),
-        backgroundColor: Color(0xFF6A11CB),
+        title: Text("Submit Complaint", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Color(0xFF001F3F),
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: "Complaint Title",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Enter title" : null,
-                onSaved: (value) => title = value!,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: "Description",
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Enter description" : null,
-                onSaved: (value) => description = value!,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: "Location",
-                  hintText: "e.g. Near Central Park",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.location_on),
-                ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Enter location" : null,
-                onSaved: (value) => location = value!,
-              ),
-              SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: category,
-                items: categories
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                    .toList(),
-                onChanged: (value) => setState(() => category = value!),
-                decoration: InputDecoration(
-                  labelText: "Category",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 24),
-              SizedBox(
+              // Header card
+              Container(
                 width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF6A11CB),
-                  ),
-                  onPressed: submitComplaint,
-                  child: Text(
-                    "Submit Complaint",
-                    style: TextStyle(fontSize: 16),
-                  ),
+                padding: EdgeInsets.all(20),
+                margin: EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Color(0xFFE3F2FD).withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Color(0xFF00A8E8).withOpacity(0.4), width: 1.5),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.18), blurRadius: 12, offset: Offset(0, 5))],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Report an Issue", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF003366))),
+                    SizedBox(height: 4),
+                    Text("Fill the form below to submit your complaint", style: TextStyle(fontSize: 13, color: Color(0xFF0288D1))),
+                    SizedBox(height: 20),
+                    _navyInputField(label: "Complaint Title", onSaved: (v) => title = v!, validator: (v) => v!.isEmpty ? "Enter title" : null),
+                    SizedBox(height: 14),
+                    
+                    // Voice Input aware Description
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _navyInputField(
+                            label: "Description", 
+                            maxLines: 3, 
+                            controller: _descController,
+                            onSaved: (v) => description = v ?? '', 
+                            validator: (v) => v == null || v.isEmpty ? "Enter description" : null
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: _listen,
+                          child: Container(
+                            margin: EdgeInsets.only(top: 4),
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: _isListening ? Colors.red : Color(0xFF003366),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(_isListening ? Icons.mic : Icons.mic_none, color: Colors.white, size: 24),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 14),
+                    _navyInputField(label: "Location", prefixIcon: Icons.location_on, onSaved: (v) => location = v!, validator: (v) => v!.isEmpty ? "Enter location" : null),
+                    SizedBox(height: 14),
+                    DropdownButtonFormField<String>(
+                      value: category,
+                      dropdownColor: Colors.white,
+                      style: TextStyle(color: Color(0xFF003366), fontWeight: FontWeight.w600),
+                      items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                      onChanged: (value) => setState(() => category = value!),
+                      decoration: InputDecoration(
+                        labelText: "Category",
+                        labelStyle: TextStyle(color: Color(0xFF666666)),
+                        filled: true,
+                        fillColor: Color(0xFFF8F9FA),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Color(0xFFE0E0E0))),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Color(0xFFE0E0E0))),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Color(0xFF00A8E8), width: 2)),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    
+                    // Photo Upload
+                    Text("Evidence (Optional)", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF003366))),
+                    SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        width: double.infinity,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Color(0xFF00A8E8).withOpacity(0.5), width: 1, style: BorderStyle.solid),
+                        ),
+                        child: _imageFile != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(13),
+                                child: Image.file(_imageFile!, fit: BoxFit.cover, width: double.infinity),
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.camera_alt_outlined, color: Color(0xFF00A8E8), size: 36),
+                                  SizedBox(height: 8),
+                                  Text("Tap to upload photo", style: TextStyle(color: Color(0xFF0288D1), fontWeight: FontWeight.w600)),
+                                ],
+                              ),
+                      ),
+                    ),
+                    if (_imageFile != null)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () => setState(() => _imageFile = null),
+                          icon: Icon(Icons.delete_outline, size: 16, color: Colors.red),
+                          label: Text("Remove", style: TextStyle(color: Colors.red)),
+                        ),
+                      ),
+                    
+                    SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF00A8E8),
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        onPressed: submitComplaint,
+                        child: Text("Submit Complaint", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  InputDecoration _navyInputDecoration({required String label, IconData? prefixIcon}) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Color(0xFF666666)),
+      prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Color(0xFF00A8E8)) : null,
+      filled: true,
+      fillColor: Color(0xFFF8F9FA),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Color(0xFFE0E0E0))),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Color(0xFFE0E0E0))),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Color(0xFF00A8E8), width: 2)),
+    );
+  }
+
+  Widget _navyInputField({required String label, IconData? prefixIcon, int maxLines = 1, FormFieldSetter<String>? onSaved, FormFieldValidator<String>? validator, TextEditingController? controller}) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      style: TextStyle(color: Color(0xFF333333), fontWeight: FontWeight.w600),
+      decoration: _navyInputDecoration(label: label, prefixIcon: prefixIcon),
+      validator: validator,
+      onSaved: onSaved,
     );
   }
 }
